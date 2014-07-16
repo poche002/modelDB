@@ -1,0 +1,42 @@
+from pecan.rest import RestController
+from pecan import expose, request, abort
+from json import dumps
+
+#users_dict = users.Users()
+
+class BadgesController(RestController):
+
+    @expose('json')
+    def get_all(self, user_id):
+        #if users_dict.get_all_bad(user_id):
+        #    return users_dict.get_all_bad(user_id)
+        #else:
+        #    abort(404)
+        pass
+
+    @expose('json')
+    def get_one(self, user_id, badge_id):
+        #if users_dict.get_one_bad(user_id, badge_id):
+         #  return users_dict.get_one_bad(user_id, badge_id)
+        #else:
+        #    abort(404)
+        pass
+
+    @expose()
+    def post(self, user_id, badge_id):
+        #try:
+        #    cant_req = request.json["cant_req"]
+        #    cant_act = request.json["cant_act"]
+        #except KeyError:
+        #    abort(400)
+        pass
+
+    @expose()
+    def delete(self, user_id, badge_id):
+        #if not users_dict.delete_bad(user_id, badge_id):
+        #    return "nada"
+        pass
+
+    @expose()
+    def put(self, user_id, badge_id):
+        pass
