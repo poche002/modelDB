@@ -1,0 +1,47 @@
+from pecan import expose, abort
+from pecan.rest import RestController
+from pecan.secure import secure
+from test_project.model import model
+import badgesController
+
+
+@secure('check_permissions')
+class UsersController(RestController):
+
+    badges = badgesController.BadgesController()
+
+    @expose('json')
+    def get_all(self):
+        #return namelist of all users
+        pass
+
+    @expose('json')
+    def get_one(self, user_id):
+        try:
+            model.start()
+            user = model.get_user(user_id)
+            import ipdb; ipdb.set_trace()
+            user_dict = {user.user_id:user.fullname}
+            model.clear()
+
+            return user_dict
+        except KeyError:
+            abort(404)
+                #raise exc.HTTPNotFound()
+
+    @expose()
+    def post(self, user_id):
+
+        pass
+
+    @expose()
+    def delete(self, user_id="none"):
+        #if not users_dict.delete_user(user_id):
+        #   abort(404)
+        pass
+
+    @expose('error.html')
+    def notfound(self):
+        #import ipdb; ipdb.set_trace()
+        #return dict(status=404, message="test_project does not have this page")
+        pass
