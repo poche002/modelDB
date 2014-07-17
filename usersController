@@ -11,27 +11,29 @@ class UsersController(RestController):
     badges = badgesController.BadgesController()
 
     @expose('json')
-    def get_all(self):
-        #return namelist of all users
-        pass
-
-    @expose('json')
     def get_one(self, user_id):
         try:
-            model.start()
+            badges = {}
             user = model.get_user(user_id)
-            import ipdb; ipdb.set_trace()
-            user_dict = {user.user_id:user.fullname}
-            model.clear()
 
+            for u in user.users:
+                badges[u.badge.badge_id] = (u.cant_act, u.badge.amount_necessary, u.badge.description)
+            user_dict = {user.user_id:{'fullname':user.fullname,'password':user.password, 'badges':badges}}
             return user_dict
+
         except KeyError:
             abort(404)
                 #raise exc.HTTPNotFound()
 
+    @expose('json')
+    def get_all(self):
+        users_dict={}
+        for user in model.get_all_users():
+            users_dict[user.user_id] = self.get_one(user.user_id)[user.user_id]
+        return users_dict
+
     @expose()
     def post(self, user_id):
-
         pass
 
     @expose()
