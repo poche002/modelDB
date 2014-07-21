@@ -53,15 +53,10 @@ class UserBadges(Base):
 
 
 
-user1 = User(user_id='User1', fullname='Ed Jones1', password='pass1')
-user2 = User(user_id='User2', fullname='Ed Jones2', password='pass2')
-badge1 = Badge(badge_id='Badge1', amount_necessary = 10, description = 'este es el badge1')
-badge2 = Badge(badge_id='Badge2', amount_necessary = 15, description = 'este es el badge2')
-badge3 = Badge(badge_id='Badge3', amount_necessary = 20, description = 'este es el badge3')
-userBadge11 = UserBadges(user=user1, badge=badge1, cant_act=11)
-userBadge13 = UserBadges(user=user1, badge=badge3, cant_act=13)
-userBadge21 = UserBadges(user=user2, badge=badge1, cant_act=21)
-userBadge22 = UserBadges(user=user2, badge=badge2, cant_act=22)
+##userBadge11 = UserBadges(user=user1, badge=badge1, cant_act=11)
+##userBadge13 = UserBadges(user=user1, badge=badge3, cant_act=13)
+##userBadge21 = UserBadges(user=user2, badge=badge1, cant_act=21)
+##userBadge22 = UserBadges(user=user2, badge=badge2, cant_act=22)
 
 
 
@@ -82,7 +77,6 @@ def init_model():
 def start():
     Session.bind = conf.sqlalchemy.engine
     Base.metadata.bind = Session.bind
-    import ipdb; ipdb.set_trace()
 
 def start_read_only():
     start()
@@ -97,8 +91,40 @@ def clear():
     Session.remove()
 
 def get_user(user_id):
-    user = Session.query(User).filter_by(user_id=user_id).first()
-    return user
+    return Session.query(User).filter_by(user_id=user_id).first()
+
+def get_badge(badge_id):
+    return Session.query(Badge).filter_by(badge_id=badge_id).first()
 
 def get_all_users():
     return Session.query(User).all()
+
+def create_user(user_id, fullname, password):
+    new_user = User(user_id=user_id, fullname=fullname, password=password)
+    Session.add(new_user)
+    for badge_aux in Session.query(Badge).all():
+        Session.add(UserBadges(user=new_user, badge=badge_aux, cant_act=0))
+
+
+def create_badge(badge_id, amount_nec, desc):
+    new_badge = Badge(badge_id=badge_id, amount_necessary=amount_nec, description=desc)
+    Session.add(new_badge)
+    for user_aux in Session.query(User).all():
+        Session.add(UserBadges(user=user_aux, badge=new_badge, cant_act=0))
+
+def delete_user(user_id):
+    try:
+        us_id = Session.query(User).filter_by(user_id=user_id).first().id
+        Session.query(UserBadges).filter_by(user_id=us_id).delete()
+        return Session.query(User).filter_by(user_id=user_id).delete()
+    except AttributeError:
+        return 0
+
+def edit_user(user_id_old, user_id, fullname, password):
+    if Session.query(User).filter_by(user_id=user_id_old).first():
+        Session.query(User).filter_by(user_id=user_id_old).first().fullname = fullname
+        Session.query(User).filter_by(user_id=user_id_old).first().password = password
+        Session.query(User).filter_by(user_id=user_id_old).first().user_id = user_id
+        return True
+    else:
+        return False
