@@ -1,4 +1,4 @@
-from pecan import expose, abort
+from pecan import expose, abort, request, response
 from pecan.rest import RestController
 from pecan.secure import secure
 from test_project.model import model
@@ -12,18 +12,15 @@ class UsersController(RestController):
 
     @expose('json')
     def get_one(self, user_id):
-        try:
-            badges = {}
-            user = model.get_user(user_id)
-
+        badges = {}
+        user = model.get_user(user_id)
+        if user:
             for u in user.users:
                 badges[u.badge.badge_id] = (u.cant_act, u.badge.amount_necessary, u.badge.description)
             user_dict = {user.user_id:{'fullname':user.fullname,'password':user.password, 'badges':badges}}
             return user_dict
-
-        except KeyError:
-            abort(404)
-                #raise exc.HTTPNotFound()
+        else:
+            response.status = 404
 
     @expose('json')
     def get_all(self):
@@ -33,14 +30,38 @@ class UsersController(RestController):
         return users_dict
 
     @expose()
-    def post(self, user_id):
-        pass
+    def post(self):
+        user_id = request.POST.get('user_id')
+        if model.get_user(user_id):
+            response.status = 409
+        else:
+            fullname = request.POST.get('fullname')
+            password = request.POST.get('password')
+            if (user_id and fullname and password):
+                model.create_user(user_id, fullname, password)
+                response.status = 201
+            else:
+                response.status = 400
 
     @expose()
-    def delete(self, user_id="none"):
-        #if not users_dict.delete_user(user_id):
-        #   abort(404)
-        pass
+    def delete(self, user_id='none'):
+        if model.delete_user(user_id):
+            response.status = 200
+        else:
+            response.status = 404
+
+    @expose('json')
+    def put(self, user_id_old):
+        user_id = request.POST.get('user_id')
+        fullname = request.POST.get('fullname')
+        password = request.POST.get('password')
+        if (user_id_old and user_id and fullname and password):
+            if model.edit_user(user_id_old, user_id, fullname, password):
+                response.status = 200
+            else:
+                response.status = 404
+        else:
+            response.status = 400
 
     @expose('error.html')
     def notfound(self):
